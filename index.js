@@ -1,5 +1,5 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 
 const persons = {
   "persons": [
@@ -28,13 +28,21 @@ const persons = {
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1>')
-})
+});
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
-})
+  res.json(persons);
+});
 
-const port = 3001
-app.listen(port)
-console.log(`Server running on port ${port}`)
+app.get('/info', (req, res) => {
+  const date = new Date().toString();
+  res.send(`
+    <p>puhelinluettelossa on ${persons.persons.length} henkilön tiedot</p>
+    <p>${date}<p>
+  `);
+});
+
+const port = 3001;
+app.listen(port);
+console.log(`Server running on port ${port}`);
 
