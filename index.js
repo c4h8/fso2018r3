@@ -1,8 +1,22 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const morgan = require('morgan');
 
 app.use(bodyParser.json());
+morgan.token('payload', req => JSON.stringify(req.body));
+app.use(morgan(':method :url :payload :status :res[content-length] - :response-time ms'));
+
+// app.use(morgan((tokens, req, res) => 
+//   [
+//     tokens.method(req, res), 
+//     tokens.url(req, res),
+//     JSON.stringify(req.body),
+//     tokens.status(req, res),
+//     tokens.res(req, res, 'content-length'), '-',
+//     tokens['response-time'](req, res), 'ms'
+//   ].join(' ')
+// ));
 
 let data = {
   "persons": [
@@ -45,7 +59,7 @@ app.get('/api/persons', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   const payload = req.body;
-  console.log('payload', payload);
+  //console.log('payload', payload);
 
   if(!payload.name || !payload.number) return res.status(400).json({error: 'name and number needed'});
   if(nameIsNotUnique(payload.name)) return res.status(400).json({error: 'name must be unique'});
