@@ -32,7 +32,7 @@ let data = {
 const generateId = () => Math.floor(Math.random() * 1000000000);
 const getIds = () => data.persons.map(p => p.id);
 const getNames = () => data.persons.map(p => p.name);
-const nameIsUnique = name => getNames().includes(name);
+const nameIsNotUnique = name => getNames().includes(name);
 const addPerson = payload => data.persons.push(Object.assign({}, payload, {id: generateId()}));
 
 app.get('/', (req, res) => {
@@ -45,11 +45,12 @@ app.get('/api/persons', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   const payload = req.body;
-  //if(!payload.name)
   console.log('payload', payload);
+
+  if(!payload.name || !payload.number) return res.status(400).json({error: 'name and number needed'});
+  if(nameIsNotUnique(payload.name)) return res.status(400).json({error: 'name must be unique'});
+
   addPerson(payload);
-
-
   res.json(data.persons);
 });
 
@@ -61,7 +62,7 @@ app.get('/api/persons/:index', (req, res) => {
   if(person) {
     res.json(person);
   } else {
-    res.status(404).send('person not found');
+    res.status(404).json({error: 'person not found'});
   }
 });
 
@@ -73,7 +74,7 @@ app.delete('/api/persons/:index', (req, res) => {
     data.persons = data.persons.filter(p => p.id != id);
     res.json(person);
   } else {
-    res.status(404).send('person not found');
+    res.status(404).json({error: 'person not found'});
   }
 });
 
