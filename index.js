@@ -1,7 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const app = express();
 const morgan = require('morgan');
+
+const app = express();
+const port = process.env.PORT || 3001;
 
 app.use(bodyParser.json());
 morgan.token('payload', req => JSON.stringify(req.body));
@@ -100,7 +102,4 @@ app.get('/info', (req, res) => {
   `);
 });
 
-const port = 3001;
-app.listen(port);
-console.log(`Server running on port ${port}`);
-
+app.listen(port, () => console.log(`Server running on port ${port}`));
