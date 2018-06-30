@@ -3,12 +3,13 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
 
-const app = express();
-app.use(cors())
-
 const port = process.env.PORT || 3001;
 
+const app = express();
+app.use(express.static('build'));
+app.use(cors());
 app.use(bodyParser.json());
+
 morgan.token('payload', req => JSON.stringify(req.body));
 app.use(morgan(':method :url :payload :status :res[content-length] - :response-time ms'));
 
@@ -52,11 +53,15 @@ const generateId = () => Math.floor(Math.random() * 1000000000);
 const getIds = () => data.persons.map(p => p.id);
 const getNames = () => data.persons.map(p => p.name);
 const nameIsNotUnique = name => getNames().includes(name);
-const addPerson = payload => data.persons.push(Object.assign({}, payload, {id: generateId()}));
+const addPerson = payload => {
+  const newPerson = Object.assign({}, payload, {id: generateId()})
+  data.persons.push(newPerson);
+  return (newPerson);
+};
 
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1>')
-});
+// app.get('/', (req, res) => {
+//   res.send('<h1>Hello World!</h1>')
+// });
 
 app.get('/api/persons', (req, res) => {
   res.json(data.persons);
@@ -69,8 +74,8 @@ app.post('/api/persons', (req, res) => {
   if(!payload.name || !payload.number) return res.status(400).json({error: 'name and number needed'});
   if(nameIsNotUnique(payload.name)) return res.status(400).json({error: 'name must be unique'});
 
-  addPerson(payload);
-  res.json(data.persons);
+  const newPerson = addPerson(payload);
+  res.json(newPerson);
 });
 
 
