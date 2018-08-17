@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
+const { Person, formatPerson } = require('./mongo.js');
 
 const port = process.env.PORT || 3001;
 
@@ -59,12 +60,14 @@ const addPerson = payload => {
   return (newPerson);
 };
 
-// app.get('/', (req, res) => {
-//   res.send('<h1>Hello World!</h1>')
-// });
-
 app.get('/api/persons', (req, res) => {
-  res.json(data.persons);
+  Person
+    .find({})
+    .then(persons => {
+      const asd = persons.map(Person.format);
+      res.json(asd);
+    })
+    .catch(e => res.status(500).json({error: 'something went wrong'}))
 });
 
 app.post('/api/persons', (req, res) => {
