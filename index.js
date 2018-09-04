@@ -58,22 +58,19 @@ app.get('/api/persons', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   const payload = req.body;
-  console.log(payload)
 
   if(!payload.name || payload.name.trim() === '') return res.status(400).json({error: 'name required'});
   if(!payload.number || payload.number.trim() === '') return res.status(400).json({error: 'number required'});
 
-  console.log('lulll');
+    const newPerson = new Person(payload);
+    newPerson
+      .save()
+      .then(p => res.json(Person.format(p)))
+      .catch(e => {
+        console.log(e.message);
+        res.status(400).json({error: 'something went wrong'});
+      });
 
-  const newPerson = new Person(payload);
-  newPerson
-    .save()
-    .then(p => res.json(Person.format(p)))
-    .catch(e => {
-      console.log('dadgener')
-      console.log(e.message);
-      res.status(400).json({error: 'name must be unique'});
-    });
 });
 
 
@@ -89,16 +86,25 @@ app.get('/api/persons/:index', (req, res) => {
     });
 });
 
-app.delete('/api/persons/:index', (req, res) => {
-  const id = req.params.index;
+app.put('/api/persons/:index', (req, res) => {
+  const payload = req.body;
 
-  Person
-    .deleteOne({ '_id': id})
-    .then(p => res.json(Person.format(p)))
-    .catch(e => {
-      console.log(e.message)
-      res.status(404).json({error: 'person not found'});
-    });
+  if(!payload.name || payload.name.trim() === '') return res.status(400).json({error: 'name required'});
+  if(!payload.number || payload.number.trim() === '') return res.status(400).json({error: 'number required'});
+
+  const existingPerson = Person.findOne({ 'name': payload.name })
+
+  if (existingPerson) {
+    existingPerson.number = payload.number;
+    existingPerson.save()
+      .then(p => res.json(Person.format(p)))
+      .catch(e => {
+        console.log(e.message);
+        res.status(400).json({error: 'something went wrong'});
+      });
+  } else {
+    res.status(404).json({error: 'person not found'});
+  }
 });
 
 app.get('/info', (req, res) => {
@@ -117,3 +123,26 @@ app.get('/info', (req, res) => {
 });
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
+
+
+
+/*
+  if (existingPerson) {
+    existingPerson.number = payload.number;
+    existingPerson.save()
+      .then(p => res.json(Person.format(p)))
+      .catch(e => {
+        console.log(e.message);
+        res.status(400).json({error: 'something went wrong'});
+      });
+  } else {
+    const newPerson = new Person(payload);
+    newPerson
+      .save()
+      .then(p => res.json(Person.format(p)))
+      .catch(e => {
+        console.log(e.message);
+        res.status(400).json({error: 'something went wrong'});
+      });
+  }
+*/
