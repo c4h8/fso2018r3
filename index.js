@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
-const { Person, formatPerson } = require('./mongo.js');
+const { Person } = require('./mongo.js');
 
 const port = process.env.PORT || 3001;
 
@@ -13,17 +13,6 @@ app.use(bodyParser.json());
 
 morgan.token('payload', req => JSON.stringify(req.body));
 app.use(morgan(':method :url :payload :status :res[content-length] - :response-time ms'));
-
-// app.use(morgan((tokens, req, res) => 
-//   [
-//     tokens.method(req, res), 
-//     tokens.url(req, res),
-//     JSON.stringify(req.body),
-//     tokens.status(req, res),
-//     tokens.res(req, res, 'content-length'), '-',
-//     tokens['response-time'](req, res), 'ms'
-//   ].join(' ')
-// ));
 
 let data = {
   "persons": [
@@ -63,50 +52,64 @@ const addPerson = payload => {
 app.get('/api/persons', (req, res) => {
   Person
     .find({})
-    .then(persons => {
-      const asd = persons.map(Person.format);
-      res.json(asd);
-    })
+    .then(persons => res.json(persons.map(Person.format)))
     .catch(e => res.status(500).json({error: 'something went wrong'}))
 });
 
 app.post('/api/persons', (req, res) => {
   const payload = req.body;
-  //console.log('payload', payload);
+  console.log(payload)
 
-  if(!payload.name || !payload.number) return res.status(400).json({error: 'name and number needed'});
-  if(nameIsNotUnique(payload.name)) return res.status(400).json({error: 'name must be unique'});
+  if(!payload.name || payload.name.trim() === '') return res.status(400).json({error: 'name required'});
+  if(!payload.number || payload.number.trim() === '') return res.status(400).json({error: 'number required'});
 
-  const newPerson = addPerson(payload);
-  res.json(newPerson);
+  console.log('lulll');
+
+  const newPerson = new Person(payload);
+  newPerson
+    .save()
+    .then(p => res.json(Person.format(p)))
+    .catch(e => {
+      console.log('dadgener')
+      console.log(e.message);
+      res.status(400).json({error: 'name must be unique'});
+    });
 });
 
 
 app.get('/api/persons/:index', (req, res) => {
   const id = req.params.index;
-  const person = data.persons.find(p => p.id == id);
 
-  if(person) {
-    res.json(person);
-  } else {
-    res.status(404).json({error: 'person not found'});
-  }
+  Person
+    .findOne({ '_id': id})
+    .then(p => res.json(Person.format(p)))
+    .catch(e => {
+      console.log(e.message)
+      res.status(404).json({error: 'person not found'});
+    });
 });
 
 app.delete('/api/persons/:index', (req, res) => {
   const id = req.params.index;
-  const person = data.persons.find(p => p.id == id);
 
-  if(person) {
-    data.persons = data.persons.filter(p => p.id != id);
-    res.json(person);
-  } else {
-    res.status(404).json({error: 'person not found'});
-  }
+  Person
+    .deleteOne({ '_id': id})
+    .then(p => res.json(Person.format(p)))
+    .catch(e => {
+      console.log(e.message)
+      res.status(404).json({error: 'person not found'});
+    });
 });
 
 app.get('/info', (req, res) => {
+  let userCount = undefined;
   const date = new Date().toString();
+
+  Person
+    .find({})
+    .then(persons => userCount = persons.length)
+    .catch(e => res.status(500).json({error: 'something went wrong'}))
+
   res.send(`
     <p>puhelinluettelossa on ${data.persons.length} henkilön tiedot</p>
     <p>${date}<p>
