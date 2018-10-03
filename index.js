@@ -33,7 +33,7 @@ app.post('/api/persons', (req, res) => {
     .then(p => res.json(Person.format(p)))
     .catch(e => {
       if(e.code == 11000) return res.status(400).json({ error: 'name already exists' });
-      res.status(400).json({ error: e });
+      res.status(400).json({ error: e.error });
     });
 
 });
