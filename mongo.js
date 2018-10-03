@@ -9,7 +9,7 @@ const url = process.env.DATABASE_URL;
 mongoose.connect(url);
 
 const Person = mongoose.model('Person', {
-  name: {type: String, unique: true},
+  name: { type: String, unique: true },
   number: String,
 });
 
@@ -44,14 +44,14 @@ if(process.argv.length === 4) {
     .then(res => {
       console.log('person saved', res);
       mongoose.connection.close();
-    })
+    });
 } else {
-  persons = Person
+  Person
     .find({})
     .then(res => {
       console.log('puhelinluettelo:');
       res.forEach(p => console.log(`  ${p.name} ${p.number}`));
-    })
+    });
 }
 
-module.exports = {Person};
+module.exports = { Person };

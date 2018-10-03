@@ -18,23 +18,23 @@ app.get('/api/persons', (req, res) => {
   Person
     .find({})
     .then(persons => res.json(persons.map(Person.format)))
-    .catch(e => res.status(500).json({error: 'something went wrong'}))
+    .catch(() => res.status(500).json({ error: 'something went wrong' }));
 });
 
 app.post('/api/persons', (req, res) => {
   const payload = req.body;
 
-  if(!payload.name || payload.name.trim() === '') return res.status(400).json({error: 'name required'});
-  if(!payload.number || payload.number.trim() === '') return res.status(400).json({error: 'number required'});
+  if(!payload.name || payload.name.trim() === '') return res.status(400).json({ error: 'name required' });
+  if(!payload.number || payload.number.trim() === '') return res.status(400).json({ error: 'number required' });
 
-    const newPerson = new Person(payload);
-    newPerson
-      .save()
-      .then(p => res.json(Person.format(p)))
-      .catch(e => {
-        if(e.code == 11000) return res.status(400).json({error: 'name already exists'});
-        res.status(400).json({error: e});
-      });
+  const newPerson = new Person(payload);
+  newPerson
+    .save()
+    .then(p => res.json(Person.format(p)))
+    .catch(e => {
+      if(e.code == 11000) return res.status(400).json({ error: 'name already exists' });
+      res.status(400).json({ error: e });
+    });
 
 });
 
@@ -43,25 +43,25 @@ app.get('/api/persons/:index', (req, res) => {
   const id = req.params.index;
 
   Person
-    .findOne({ '_id': id})
+    .findOne({ '_id': id })
     .then(p => res.json(Person.format(p)))
     .catch(e => {
-      console.log(e.message)
-      res.status(404).json({error: 'person not found'});
+      console.log(e.message);
+      res.status(404).json({ error: 'person not found' });
     });
 });
 
 app.put('/api/persons/:index', (req, res) => {
   const payload = req.body;
 
-  if(!payload.name || payload.name.trim() === '') return res.status(400).json({error: 'name required'});
-  if(!payload.number || payload.number.trim() === '') return res.status(400).json({error: 'number required'});
+  if(!payload.name || payload.name.trim() === '') return res.status(400).json({ error: 'name required' });
+  if(!payload.number || payload.number.trim() === '') return res.status(400).json({ error: 'number required' });
 
-  Person.findOneAndUpdate({ 'name': payload.name }, {number: payload.number}, { new: true })
+  Person.findOneAndUpdate({ 'name': payload.name }, { number: payload.number }, { new: true })
     .then(p => res.json(Person.format(p)))
     .catch(e => {
       console.log(e.message);
-      res.status(404).json({error: 'person not found'});
+      res.status(404).json({ error: 'person not found' });
     });
 });
 
@@ -69,11 +69,11 @@ app.delete('/api/persons/:index', (req, res) => {
   const id = req.params.index;
 
   Person
-    .deleteOne({ '_id': id})
+    .deleteOne({ '_id': id })
     .then(p => res.json(Person.format(p)))
     .catch(e => {
-      console.log(e.message)
-      res.status(404).json({error: 'person not found'});
+      console.log(e.message);
+      res.status(404).json({ error: 'person not found' });
     });
 });
 
@@ -88,7 +88,7 @@ app.get('/info', (req, res) => {
         <p>${date}<p>
       `)
     )
-    .catch(e => res.status(500).json({error: 'something went wrong'}))
+    .catch(() => res.status(500).json({ error: 'something went wrong' }));
 });
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
