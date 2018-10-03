@@ -19,6 +19,19 @@ Person.format = person => ({
   id: person._id
 });
 
+// Person.schema.pre('save', function(next) {
+//   var self = this;
+//   console.log('request name: ', self.name);
+//   Person.findOne({name: self.name}, (err, person) => {
+//     if(person) {
+//       self.invalidate('name', 'name must be unique');
+//       console.log('duplicate person founded')
+//       next(new Error('name must be unique'));
+//     }
+//   });
+//   next();
+// });
+
 if(process.argv.length === 4) {
   console.log(`yritetään lisätä henkilö ${process.argv[2]} numero ${process.argv[3]}`);
   const person = new Person({

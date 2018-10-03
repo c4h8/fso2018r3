@@ -32,8 +32,8 @@ app.post('/api/persons', (req, res) => {
       .save()
       .then(p => res.json(Person.format(p)))
       .catch(e => {
-        console.log(e.message);
-        res.status(400).json({error: 'something went wrong'});
+        if(e.code == 11000) return res.status(400).json({error: 'name already exists'});
+        res.status(400).json({error: e});
       });
 
 });
@@ -61,7 +61,7 @@ app.put('/api/persons/:index', (req, res) => {
     .then(p => res.json(Person.format(p)))
     .catch(e => {
       console.log(e.message);
-      res.status(400).json({error: 'something went wrong'});
+      res.status(404).json({error: 'person not found'});
     });
 });
 
